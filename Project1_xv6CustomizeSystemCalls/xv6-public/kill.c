@@ -8,11 +8,11 @@ int main(int argc, char *argv[]) {
     int sig = atoi(argv[2]);  // Get the signal number from command-line argument
 
     if (kill(pid, sig) < 0) {
-        printf("Error sending signal %d to process %d\n", sig, pid);
+        printf(1,"Error sending signal %d to process %d\n", sig, pid);
     } else {
-        printf("Signal %d sent to process %d\n", sig, pid);
+        printf(1,"Signal %d sent to process %d\n", sig, pid);
     }
 
-    exit(0);
+    exit();
 }
 

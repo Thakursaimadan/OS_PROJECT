@@ -333,10 +333,10 @@ void scheduler(void) {
 
         // Loop over process table looking for process to run.
         for (struct proc *p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-            if (p->state != RUNNABLE)
+            if (p->state != RUNNABLE || p->stopped)  // Skip stopped processes
                 continue;
 
-            // Switch to chosen process. It is the "proc".
+            // Switch to chosen process.
             c->proc = p;
             switchuvm(p);
             p->state = RUNNING;
@@ -344,11 +344,13 @@ void scheduler(void) {
             swtch(&(c->scheduler), p->context);  // Context switch
             switchkvm();
 
+            // Process is done running for now.
             c->proc = 0;
         }
         release(&ptable.lock);
     }
 }
+
 
 
 
