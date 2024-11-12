@@ -20,9 +20,9 @@ int main(int argc, char *argv[]) {
     if(pid == 0) {  // Child process
         printf(1, "Child process started with pid %d\n", getpid());
         char buf[MAX_MSG_SIZE];
-        sleep(50);  // Wait for parent to send
+        sleep(500);  // Wait for parent to send
         printf(1, "Child trying to receive message...\n");
-        if(msgrecv(buf) < 0) {
+        if(msgrecv(getpid(), buf) < 0) {
             printf(2, "No message received by child\n");
         } else {
             printf(1, "Child received message: %s\n", buf);

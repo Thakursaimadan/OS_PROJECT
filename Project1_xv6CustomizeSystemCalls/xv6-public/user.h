@@ -41,7 +41,7 @@ void free(void*);
 int atoi(const char*);
 
 int msgsend(int pid, char* msg);
-int msgrecv(char* buf);
+int msgrecv(int pid, char* buf);
 // user.h
 int sigstop(int pid);
 int sigcont(int pid);

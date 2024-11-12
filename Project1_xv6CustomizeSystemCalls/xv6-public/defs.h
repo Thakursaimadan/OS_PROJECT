@@ -188,7 +188,7 @@ void            clearpteu(pde_t *pgdir, char *uva);
 // Add to defs.h
 struct proc* findproc(int pid);
 int sendmessage(int pid, char *msg);
-int receivemessage(char *buf);
+int receivemessage(int pid,char *buf);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

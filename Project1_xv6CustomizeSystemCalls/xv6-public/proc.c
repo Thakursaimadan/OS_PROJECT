@@ -534,57 +534,56 @@ procdump(void)
   }
 }
 // Add this to proc.c
+//proc.c
+// proc.c
+
+// Find process by PID while holding the lock.
 struct proc* findproc(int pid) {
     struct proc *p;
-    
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-        if(p->pid == pid && p->state != UNUSED) {
-            release(&ptable.lock);
+	acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == pid) {
+		release(&ptable.lock);
             return p;
         }
     }
+    return 0;
+}
+
+// proc.c (sendmessage debugged)
+// In proc.c
+
+int sendmessage(int pid, char *msg) {
+    struct proc *p = findproc(pid);
+    if (p == 0) {
+        cprintf("sendmessage: No process found with pid %d\n", pid);
+        return -1;
+    }
+
+    acquire(&ptable.lock);
+    safestrcpy(p->msgbuf, msg, MAX_MSG_SIZE);
+    p->msg_available = 1;
     release(&ptable.lock);
     return 0;
 }
-int sendmessage(int pid, char *msg) {
-    struct proc *p;
-    
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-        if(p->pid == pid && p->state != UNUSED) {
-            cprintf("msgsend: found target process pid %d\n", pid);
-            strncpy(p->msgbuf, msg, MAX_MSG_SIZE - 1);
-            p->msgbuf[MAX_MSG_SIZE - 1] = '\0';
-            p->msg_available = 1;
-            release(&ptable.lock);
-            return 0;
-        }
+
+int receivemessage(int pid, char *buf) {
+    struct proc *p = findproc(pid);
+    if (p == 0) {
+        cprintf("receivemessage: No process found with pid %d\n", pid);
+        return -1;
     }
-    
-    cprintf("msgsend: target process %d not found\n", pid);
+
+    acquire(&ptable.lock);
+    if(p->msg_available == 0) {   
     release(&ptable.lock);
-    return -1;
+            return -1;
+        }
+    safestrcpy(buf, p->msgbuf, MAX_MSG_SIZE);
+    p->msg_available = 0;
+    release(&ptable.lock);
+    return 0;
 }
 
-int receivemessage(char *buf) {
-    struct proc *curproc = myproc();
-    
-    acquire(&ptable.lock);
-    cprintf("msgrecv: checking messages for pid %d\n", curproc->pid);
-    
-    if (curproc->msg_available) {
-        strncpy(buf, curproc->msgbuf, MAX_MSG_SIZE - 1);
-        buf[MAX_MSG_SIZE - 1] = '\0';
-        curproc->msg_available = 0;
-        memset(curproc->msgbuf, 0, MAX_MSG_SIZE);
-        cprintf("msgrecv: message found and copied\n");
-        release(&ptable.lock);
-        return 0;
-    }
-    
-    cprintf("msgrecv: no message available for pid %d\n", curproc->pid);
-    release(&ptable.lock);
-    return -1;
-}
+
 
