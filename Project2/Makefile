@@ -28,7 +28,7 @@ custom_mv: custom_mv.c
 custom_grep: custom_grep.c
 	$(CC) $(CFLAGS) -o custom_grep custom_grep.c
 
-ashrith: shell.c
+shell: shell.c
 	$(CC) $(CFLAGS) -o shell shell.c
 
 # Rule to install the custom_ls program to /usr/local/bin
