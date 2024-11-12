@@ -1,6 +1,8 @@
 struct stat;
 struct rtcdate;
 
+#include "types.h"
+
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -46,3 +48,10 @@ int msgrecv(char* buf);
 int sigstop(int pid);
 int sigcont(int pid);
 
+
+
+
+
+
+int mutex_lock(void);
+int mutex_unlock(void);

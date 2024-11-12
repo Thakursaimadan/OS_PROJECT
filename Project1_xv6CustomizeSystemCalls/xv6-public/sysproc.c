@@ -193,3 +193,21 @@ int sys_sigcont(void) {
 
 
 
+// Inside sysproc.c
+
+volatile unsigned int mutex = 0; // Global mutex variable (simple binary lock)
+
+int sys_mutex_lock(void)
+{
+    // Spin until the lock is acquired (basic spinlock)
+    while (xchg(&mutex, 1) != 0)
+        ; // Busy-wait
+    return 0;
+}
+
+int sys_mutex_unlock(void)
+{
+    // Set mutex back to unlocked
+    mutex = 0;
+    return 0;
+}

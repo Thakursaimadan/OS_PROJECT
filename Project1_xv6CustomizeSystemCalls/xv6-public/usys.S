@@ -35,3 +35,16 @@ SYSCALL(msgrecv)
 SYSCALL(sigstop)
 SYSCALL(sigcont)
 
+// usys.S
+.globl mutex_lock
+.globl mutex_unlock
+
+mutex_lock:
+    movl $SYS_mutex_lock, %eax
+    int $64
+    ret
+
+mutex_unlock:
+    movl $SYS_mutex_unlock, %eax
+    int $64
+    ret
