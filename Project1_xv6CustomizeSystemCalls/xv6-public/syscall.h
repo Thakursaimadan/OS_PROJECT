@@ -27,3 +27,8 @@
 #define SYS_sigstop 22
 #define SYS_sigcont 23
 
+
+
+
+#define SYS_mutex_lock 25
+#define SYS_mutex_unlock 26
