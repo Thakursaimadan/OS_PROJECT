@@ -113,34 +113,38 @@ sys_getyear(void)
 {
 	return 1975;
 }
+//sysproc.c
 
-int sys_msgsend(void) {
+int
+sys_msgsend(void)
+{
     int pid;
     char *msg;
-    
-    // Get arguments
-    if (argint(0, &pid) < 0) {
-        cprintf("msgsend: failed to get pid argument\n");
+    if (argint(0, &pid) < 0 || argstr(1, &msg) < 0)
         return -1;
-    }
-    if (argptr(1, &msg, MAX_MSG_SIZE) < 0) {
-        cprintf("msgsend: failed to get message argument\n");
-        return -1;
-    }
-    
     return sendmessage(pid, msg);
 }
 
 int sys_msgrecv(void) {
+    int pid;
     char *buf;
-    
-    if (argptr(0, &buf, MAX_MSG_SIZE) < 0) {
+
+    // Get the first argument (pid)
+    if (argint(0, &pid) < 0) {
+        cprintf("msgrecv: failed to get pid argument\n");
+        return -1;
+    }
+
+    // Get the second argument (buffer)
+    if (argstr(1, &buf) < 0) {
         cprintf("msgrecv: failed to get buffer argument\n");
         return -1;
     }
-    
-    return receivemessage(buf);
+
+    // Call receivemessage with both pid and buf
+    return receivemessage(pid, buf);
 }
+
 
 // Helper function to find a process by PID
 struct proc* find_proc(int pid) {
@@ -193,3 +197,21 @@ int sys_sigcont(void) {
 
 
 
+// Inside sysproc.c
+
+volatile unsigned int mutex = 0; // Global mutex variable (simple binary lock)
+
+int sys_mutex_lock(void)
+{
+    // Spin until the lock is acquired (basic spinlock)
+    while (xchg(&mutex, 1) != 0)
+        ; // Busy-wait
+    return 0;
+}
+
+int sys_mutex_unlock(void)
+{
+    // Set mutex back to unlocked
+    mutex = 0;
+    return 0;
+}
