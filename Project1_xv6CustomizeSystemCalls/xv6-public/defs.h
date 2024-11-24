@@ -192,3 +192,12 @@ int receivemessage(int pid,char *buf);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+
+// In defs.h
+int sys_mutex_lock(void);
+int sys_mutex_unlock(void);
+
+
+int clone(void (*function)(void*), void *arg, void *stack);
+int join(int tid, void **stack);

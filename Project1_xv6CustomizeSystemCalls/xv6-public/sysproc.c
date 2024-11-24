@@ -205,13 +205,43 @@ int sys_mutex_lock(void)
 {
     // Spin until the lock is acquired (basic spinlock)
     while (xchg(&mutex, 1) != 0)
-        ; // Busy-wait
+        ; // wait
     return 0;
 }
 
 int sys_mutex_unlock(void)
 {
-    // Set mutex back to unlocked
+    // set mutex back to unlocked
     mutex = 0;
     return 0;
+}
+
+
+
+
+int
+sys_clone(void)
+{
+    void (*function)(void*);
+    void *arg;
+    void *stack;
+
+    if (argptr(0, (void*)&function, sizeof(function)) < 0 ||
+        argptr(1, (void*)&arg, sizeof(arg)) < 0 ||
+        argptr(2, (void*)&stack, sizeof(stack)) < 0)
+        return -1;
+
+    return clone(function, arg, stack);
+}
+
+int
+sys_join(void)
+{
+    int tid;
+    void **stack;
+
+    if (argint(0, &tid) < 0 || argptr(1, (void*)&stack, sizeof(stack)) < 0)
+        return -1;
+
+    return join(tid, stack);
 }

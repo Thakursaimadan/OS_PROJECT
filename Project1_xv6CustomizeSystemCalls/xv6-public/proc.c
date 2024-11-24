@@ -161,20 +161,31 @@ userinit(void)
 int
 growproc(int n)
 {
-  uint sz;
-  struct proc *curproc = myproc();
+    uint sz;
+    struct proc *p;
+    struct proc *curproc = myproc();
 
-  sz = curproc->sz;
-  if(n > 0){
-    if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
-      return -1;
-  } else if(n < 0){
-    if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
-      return -1;
-  }
-  curproc->sz = sz;
-  switchuvm(curproc);
-  return 0;
+    sz = curproc->sz;
+    if(n > 0){
+        if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
+            return -1;
+    } else if(n < 0){
+        if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
+            return -1;
+    }
+    curproc->sz = sz;
+
+    // Update size for all threads
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+        if (p->pgdir == curproc->pgdir)
+            p->sz = sz;
+    }
+    release(&ptable.lock);
+
+    switchuvm(curproc);
+    return 0;
 }
 
 // Create a new process copying p as the parent.
@@ -587,3 +598,103 @@ int receivemessage(int pid, char *buf) {
 
 
 
+
+
+
+
+
+
+
+
+
+//create a new therad ,share same address space with process
+int
+clone(void (*function)(void*), void *arg, void *stack)
+{
+    int i, pid;
+    struct proc *np;
+    struct proc *curproc = myproc();
+
+    // Allocate process.
+    if ((np = allocproc()) == 0)
+        return -1;
+
+    // Share address space
+    np->pgdir = curproc->pgdir;
+    np->sz = curproc->sz;
+
+    // Copy trap frame
+    *np->tf = *curproc->tf;
+
+    // Set up new user stack for thread
+    uint sp = (uint)stack + PGSIZE;
+    sp -= sizeof(void*);
+    *(uint*)sp = (uint)arg;
+    sp -= sizeof(void*);
+    *(uint*)sp = 0xFFFFFFFF; // Fake return PC
+    np->tf->esp = sp;
+    np->tf->eip = (uint)function;
+
+    // Clear %eax so that clone returns 0 in the child.
+    np->tf->eax = 0;
+
+    // Copy open file descriptors
+    for (i = 0; i < NOFILE; i++)
+        if (curproc->ofile[i])
+            np->ofile[i] = filedup(curproc->ofile[i]);
+    np->cwd = idup(curproc->cwd);
+
+    np->parent = curproc;
+    safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+    pid = np->pid;
+
+    acquire(&ptable.lock);
+    np->state = RUNNABLE;
+    release(&ptable.lock);
+
+    return pid;
+}
+// this function will wait for a thread to finish and clean the resources
+int
+join(int tid, void **stack)
+{
+    struct proc *p;
+    int havekids, pid;
+    struct proc *curproc = myproc();
+
+    acquire(&ptable.lock);
+    for (;;)
+    {
+        havekids = 0;
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+        {
+            if (p->parent != curproc || p->pid != tid)
+                continue;
+            havekids = 1;
+            if (p->state == ZOMBIE)
+            {
+                // Found one.
+                pid = p->pid;
+                kfree(p->kstack);
+                *stack = p->tstack;
+                p->kstack = 0;
+                p->pid = 0;
+                p->parent = 0;
+                p->name[0] = 0;
+                p->killed = 0;
+                p->state = UNUSED;
+                release(&ptable.lock);
+                return pid;
+            }
+        }
+
+        if (!havekids || curproc->killed)
+        {
+            release(&ptable.lock);
+            return -1;
+        }
+
+        sleep(curproc, &ptable.lock);
+    }
+}

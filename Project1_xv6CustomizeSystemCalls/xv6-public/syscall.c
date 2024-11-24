@@ -118,7 +118,8 @@ extern int sys_mutex_lock(void);
 extern int sys_mutex_unlock(void);
 
 
-
+extern int sys_clone(void);
+extern int sys_join(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -151,7 +152,11 @@ static int (*syscalls[])(void) = {
 
 
 [SYS_mutex_lock] sys_mutex_lock,
-[SYS_mutex_unlock] sys_mutex_unlock
+[SYS_mutex_unlock] sys_mutex_unlock,
+
+
+[SYS_clone]  sys_clone,
+[SYS_join]   sys_join
 
 };
 

@@ -32,3 +32,6 @@
 
 #define SYS_mutex_lock 25
 #define SYS_mutex_unlock 26
+
+#define SYS_clone 27
+#define SYS_join 28

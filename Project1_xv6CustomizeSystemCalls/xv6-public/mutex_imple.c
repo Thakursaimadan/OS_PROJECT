@@ -19,9 +19,9 @@ int main(void)
         increment_counter();
         exit();
     } else {
-        wait();
+        
         increment_counter();
     }
-    
+    wait();
     exit();
 }

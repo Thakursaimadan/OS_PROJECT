@@ -55,3 +55,9 @@ int sigcont(int pid);
 
 int mutex_lock(void);
 int mutex_unlock(void);
+
+
+
+
+int clone(void (*function)(void*), void *arg, void *stack);
+int join(int tid, void **stack);

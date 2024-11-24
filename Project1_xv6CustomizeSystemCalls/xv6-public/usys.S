@@ -34,6 +34,9 @@ SYSCALL(msgsend)
 SYSCALL(msgrecv)
 SYSCALL(sigstop)
 SYSCALL(sigcont)
+SYSCALL(clone)
+SYSCALL(join)
+
 
 // usys.S
 .globl mutex_lock
