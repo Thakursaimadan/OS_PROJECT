@@ -30,5 +30,13 @@
 
 
 
+<<<<<<< HEAD
 #define SYS_mutex_lock 26
 #define SYS_mutex_unlock 27
+=======
+#define SYS_mutex_lock 25
+#define SYS_mutex_unlock 26
+
+#define SYS_clone 27
+#define SYS_join 28
+>>>>>>> d23bb2b1549416ddf3a5bbae9dcf90aa95251928

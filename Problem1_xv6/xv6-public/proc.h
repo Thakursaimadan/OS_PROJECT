@@ -56,6 +56,10 @@ struct proc {
   char msgbuf[MAX_MSG_SIZE];      // Buffer for IPC messages (adjust size as needed)
   int msg_available;     // Flag to indicate if a message is available
   int stopped;     // Flag to indicate if the process is stopped
+
+
+
+  void *tstack; // User stack for the thread
 };
 
 // Process memory is laid out contiguously, low addresses first:
