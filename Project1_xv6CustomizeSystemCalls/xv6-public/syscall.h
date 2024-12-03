@@ -24,11 +24,11 @@
 #define SYS_msgsend 25
 #define SYS_msgrecv 24
 // syscall.h
-#define SYS_sigstop 22
+#define SYS_sigstop 26
 #define SYS_sigcont 23
 
 
 
 
-#define SYS_mutex_lock 25
-#define SYS_mutex_unlock 26
+#define SYS_mutex_lock 26
+#define SYS_mutex_unlock 27
